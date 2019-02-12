@@ -533,5 +533,23 @@ class OrderedSet_Tests: XCTestCase {
         let subject: OrderedSet<String> = ["One", "Two", "Three"]
         XCTAssertEqual(subject.description, "OrderedSet (3 object(s)): [One, Two, Three]")
     }
-    
+
+    // MARK: Codable
+
+    func testCodable_encodes() {
+        let subject: OrderedSet<String> = ["One", "Two", "Three"]
+        let encodedSubject: Data? = try? JSONEncoder().encode(subject)
+        XCTAssertNotNil(encodedSubject)
+    }
+
+    func testCodable_decodes() {
+        let subject: OrderedSet<String> = ["One", "Two", "Three"]
+        let encodedSubject: Data? = try? JSONEncoder().encode(subject)
+        XCTAssertNotNil(encodedSubject)
+
+        let decodedSubject: OrderedSet<String>? = try? JSONDecoder().decode(OrderedSet<String>.self, from: encodedSubject!)
+        XCTAssertNotNil(decodedSubject)
+
+        XCTAssertEqual(subject, decodedSubject!)
+    }
 }

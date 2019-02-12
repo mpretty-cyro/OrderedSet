@@ -1,6 +1,8 @@
 //  Copyright (c) 2014 James Richard. 
 //  Distributed under the MIT License (http://opensource.org/licenses/MIT).
 
+import Foundation
+
 /// An ordered, unique collection of objects.
 public struct OrderedSet<T: Hashable> {
     fileprivate var contents = [T: Index]() // Needs to have a value of Index instead of Void for fast removals
@@ -433,3 +435,26 @@ extension OrderedSet: CustomStringConvertible {
 }
 
 extension OrderedSet: RandomAccessCollection {}
+
+extension OrderedSet: Codable where T: Codable {
+    enum CodingKeys: String, CodingKey {
+        case data
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+
+        self = OrderedSet(
+            sequence: try container.decode([Element].self, forKey: CodingKeys.data)
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container: KeyedEncodingContainer<CodingKeys> = encoder.container(keyedBy: CodingKeys.self)
+
+        let contentArray: [T] = Array(contents)
+            .sorted { lhs, rhs -> Bool in lhs.value < rhs.value }
+            .map { key, _ -> T in key }
+        try container.encode(contentArray, forKey: CodingKeys.data)
+    }
+}
